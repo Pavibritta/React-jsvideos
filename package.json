@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://pavibritta.github.io/React-ProductList/",
+  "homepage": "https://pavibritta.github.io/React-jsvideos",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
