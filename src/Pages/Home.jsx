@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Carditems from "../Components/Carditems";
+import Form from "../Components/Form";
+import axios from "axios";
 
 const Home = () => {
   const [searchingProduct, setSearchingProduct] = useState("");
@@ -7,6 +9,8 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [Page, setpage] = useState(1);
+  const [open, setOpen] = useState(false);
+  const [currentVedio, setCurrentVedio] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -34,21 +38,51 @@ const Home = () => {
     setpage(1);
   }, [searchingProduct]);
 
+  const handleEdit = async (vedio) => {
+    setOpen(true);
+    console.log("edit", vedio);
+    setCurrentVedio(vedio);
+  };
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure to want to delete this video?")) return;
+
+    try {
+      await axios.delete(`https://mimic-server-api.vercel.app/videos/${id}`);
+
+      setVedios((prev) => prev.filter((v) => v.id !== id));
+      alert("Video deleted successfully!");
+    } catch (error) {
+      alert("Failed to delete video. Check console.");
+    }
+  };
   if (loading) return <p className="text-center text-red-600">Loading....</p>;
   if (error) return <p className="text-center text-red-600">{error}</p>;
   return (
     <>
       <section className=" max-w-8xl mx-auto text-center px-6 py-20 bg-linear-to-r from-blue-400 to-violet-500 text-white relative">
+        <button
+          className="bg-white text-blue-500
+          px-3 py-2 my-10 rounded shadow cursor-pointer absolute right-10 top-10"
+          onClick={() => setOpen(true)}
+        >
+          ADD
+        </button>
         <input
           type="search"
           placeholder="Search"
           className="max-w-3xl w-full bg-white text-gray-600 px-3 py-2 outline-none placeholder:text-gray-600 rounded shadow mx-auto"
           onChange={(e) => setSearchingProduct(e.target.value)}
         />
-        {vedios.length === 0 && (
+        {vedios.length > 0 ? (
+          <Carditems
+            vedios={vedios}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        ) : (
           <p className="text-red-600">No results found</p>
         )}
-        <Carditems vedios={vedios} />
+
         <div className="flex gap-10 items-center justify-center mx-auto">
           <button
             className={`px-3 py-2 my-10 rounded shadow cursor-pointer
@@ -72,6 +106,21 @@ const Home = () => {
           </button>
         </div>
       </section>
+
+      {/* form*/}
+      {open && (
+        <section className="absolute inset-0 flex  bg-white max-w-2xl mx-auto mt-30 rounded-2xl  min-h-screen px-3 py-2">
+          <Form
+            onClose={() => setOpen(false)}
+            currentVedio={currentVedio}
+            onSave={(updatedVedio) => {
+              setVedios((prev) =>
+                prev.map((v) => (v.id === updatedVedio.id ? updatedVedio : v)),
+              );
+            }}
+          />
+        </section>
+      )}
     </>
   );
 };
